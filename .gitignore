@@ -1,0 +1,24 @@
+# Build folders
+bin/
+obj/
+
+# Large binaries
+*.exe
+*.dll
+*.pdb
+*.baml
+*.cache
+*.zip
+
+# Ignore specific large files from extraction
+D3DCompiler_47_cor3.dll
+PresentationCore.dll
+PresentationFramework.dll
+PresentationNative_cor3.dll
+System.Private.CoreLib.dll
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="PokeMMOTracker.Views.DialogWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:PokeMMOTracker.Views" Background="{DynamicResource Background}" Title="Create a Character" Height="300" Width="300">
+  <Grid>
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+      <TextBlock Text="Character Name:" Margin="10" Foreground="{DynamicResource ButtonBackground}" />
+      <TextBox Name="CharacterNameTB" Width="200" Padding="5" MaxLength="10" Foreground="{DynamicResource ButtonText}" Background="{DynamicResource ButtonBackground}" PreviewKeyDown="CharacterNameTB_PreviewKeyDown" />
+      <ComboBox Name="RegionComboBox" Padding="5" Background="{DynamicResource ButtonBackground}" Foreground="{DynamicResource ButtonText}" Margin="10" Width="200" />
+      <Button Content="Continue" Background="{DynamicResource ButtonBackground}" FontWeight="Bold" BorderBrush="{DynamicResource ButtonText}" Foreground="{DynamicResource ButtonText}" Width="200" Margin="10" Padding="5" Click="Button_Click" />
+    </StackPanel>
+  </Grid>
+</Window>

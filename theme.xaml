@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Semi-transparent Dark Background -->
+  <SolidColorBrush x:Key="Background" Color="#CC1A1A1A" />
+  <!-- Buttons and elements: Dark gray -->
+  <SolidColorBrush x:Key="ButtonBackground" Color="#333333" />
+  <!-- Text: Off-white for readability -->
+  <SolidColorBrush x:Key="ButtonText" Color="#EEEEEE" />
+  <!-- Task lists: Very transparent dark grays for floating effect -->
+  <SolidColorBrush x:Key="TaskOddBackground" Color="#661A1A1A" />
+  <SolidColorBrush x:Key="TaskOddText" Color="#DDDDDD" />
+  <SolidColorBrush x:Key="TaskEvenBackground" Color="#55111111" />
+  <SolidColorBrush x:Key="TaskEvenText" Color="#DDDDDD" />
+  <!-- Checkboxes -->
+  <SolidColorBrush x:Key="CheckBoxBorder" Color="#888888" />
+</ResourceDictionary>
