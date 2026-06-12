@@ -3,7 +3,7 @@
 A fully remastered, modern, and native overlay for PokeMMO. 
 This project overhauls the original quest tracker by introducing seamless UI integration, native universal controller support, and a complete aesthetic revamp.
 
-![PokeMMO Tracker Preview](PokeMMO-Tracker-Preview.png)
+![PokeMMO Tracker Preview](PokeMMO-Tracker-Preview-REAL.png)
 
 ## 🌟 Key Features
 
