@@ -370,12 +370,20 @@ public partial class MainWindow : Window, IComponentConnector
 		Grid regionGrid = new Grid { Margin = new Thickness(0, 0, 0, 5) };
 		ProgressBar regionBar = new ProgressBar 
 		{ 
-			Value = regionPct, 
+			Value = 0, // Start at 0 for the animation
 			Height = 12, 
 			Foreground = new SolidColorBrush(Color.FromRgb(100, 200, 100)),
 			Background = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50)),
 			BorderThickness = new Thickness(0)
 		};
+		System.Windows.Media.Animation.DoubleAnimation regionAnim = new System.Windows.Media.Animation.DoubleAnimation
+		{
+			To = regionPct,
+			Duration = TimeSpan.FromMilliseconds(600),
+			EasingFunction = new System.Windows.Media.Animation.QuarticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+		};
+		regionBar.BeginAnimation(ProgressBar.ValueProperty, regionAnim);
+
 		TextBlock regionLabel = new TextBlock 
 		{ 
 			Text = $"{_regionName}: {regionPct:F1}%", 
@@ -394,12 +402,20 @@ public partial class MainWindow : Window, IComponentConnector
 		Grid globalGrid = new Grid();
 		ProgressBar globalBar = new ProgressBar 
 		{ 
-			Value = totalPct, 
+			Value = 0, // Start at 0 for the animation
 			Height = 12, 
 			Foreground = new SolidColorBrush(Color.FromRgb(100, 150, 255)),
 			Background = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50)),
 			BorderThickness = new Thickness(0)
 		};
+		System.Windows.Media.Animation.DoubleAnimation globalAnim = new System.Windows.Media.Animation.DoubleAnimation
+		{
+			To = totalPct,
+			Duration = TimeSpan.FromMilliseconds(800), // Slightly slower than region for a staggered effect
+			EasingFunction = new System.Windows.Media.Animation.QuarticEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+		};
+		globalBar.BeginAnimation(ProgressBar.ValueProperty, globalAnim);
+
 		TextBlock globalLabel = new TextBlock 
 		{ 
 			Text = $"Global: {totalPct:F1}%", 
@@ -472,7 +488,9 @@ public partial class MainWindow : Window, IComponentConnector
 				VerticalAlignment = VerticalAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
 				HorizontalAlignment = HorizontalAlignment.Stretch,
-				Margin = new Thickness(5.0, 0.0, 0.0, 0.0)
+				Margin = new Thickness(5.0, 0.0, 0.0, 0.0),
+				Opacity = (task.isDone == 1) ? 0.4 : 1.0,
+				TextDecorations = (task.isDone == 1) ? TextDecorations.Strikethrough : null
 			};
 			Grid.SetColumn(taskText, 1);
 			horizontalGrid.Children.Add(taskText);
@@ -495,11 +513,11 @@ public partial class MainWindow : Window, IComponentConnector
 		buttonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) });
 		buttonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 		
+		Style modernButtonStyle = (Style)FindResource("ModernButton");
+
 		Button previousButton = new Button
 		{
-			Background = (Brush)Application.Current.Resources["ButtonBackground"],
-			Foreground = (Brush)Application.Current.Resources["ButtonText"],
-			BorderBrush = (Brush)Application.Current.Resources["ButtonText"],
+			Style = modernButtonStyle,
 			Content = "<<", Margin = new Thickness(5.0), Width = 70.0, Height = 40.0
 		};
 		previousButton.Click += delegate { ChangeRegionProgress(-1); };
@@ -507,9 +525,7 @@ public partial class MainWindow : Window, IComponentConnector
 		
 		Button switchCharacterButton = new Button
 		{
-			Background = (Brush)Application.Current.Resources["ButtonBackground"],
-			Foreground = (Brush)Application.Current.Resources["ButtonText"],
-			BorderBrush = (Brush)Application.Current.Resources["ButtonText"],
+			Style = modernButtonStyle,
 			Content = "Switch", Margin = new Thickness(5.0), Width = 120.0, Height = 40.0
 		};
 		switchCharacterButton.Click += delegate
@@ -525,9 +541,7 @@ public partial class MainWindow : Window, IComponentConnector
 		
 		Button nextButton = new Button
 		{
-			Background = (Brush)Application.Current.Resources["ButtonBackground"],
-			Foreground = (Brush)Application.Current.Resources["ButtonText"],
-			BorderBrush = (Brush)Application.Current.Resources["ButtonText"],
+			Style = modernButtonStyle,
 			Content = ">>", Margin = new Thickness(5.0), Width = 70.0, Height = 40.0
 		};
 		nextButton.Click += delegate { ChangeRegionProgress(1); };

@@ -1,20 +1,101 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Window x:Class="PokeMMOTracker.Views.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:PokeMMOTracker.Views" xmlns:vm="clr-namespace:PokeMMOTracker.Views" Background="#01000000" Title="PokeMMO Tracker" Height="500" Width="370" FontFamily="./Fonts/#Poppins" Foreground="White" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip">
+  <Window.Resources>
+    <!-- Smooth Animated Button Style -->
+    <Style x:Key="ModernButton" TargetType="Button">
+      <Setter Property="Background" Value="#333333"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="20" BorderBrush="#555555" BorderThickness="1" RenderTransformOrigin="0.5,0.5">
+              <Border.RenderTransform>
+                <ScaleTransform x:Name="scale" ScaleX="1" ScaleY="1"/>
+              </Border.RenderTransform>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#444444" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.15"/>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#333333" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="0:0:0.15"/>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.05"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.05"/>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.1"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.1"/>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    
+    <!-- Infinite Slow Rotation for Pokeball -->
+    <Storyboard x:Key="RotatePokeball" RepeatBehavior="Forever">
+      <DoubleAnimation Storyboard.TargetName="PokeballRotate" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:45" />
+    </Storyboard>
+  </Window.Resources>
+
+  <Window.Triggers>
+    <EventTrigger RoutedEvent="Window.Loaded">
+      <BeginStoryboard Storyboard="{StaticResource RotatePokeball}" />
+    </EventTrigger>
+  </Window.Triggers>
+
   <Grid Margin="10" Background="Transparent">
     <Grid.Effect>
       <DropShadowEffect Color="Black" BlurRadius="8" Opacity="0.5" Direction="320" ShadowDepth="2"/>
     </Grid.Effect>
     <Grid.RowDefinitions>
-        <RowDefinition Height="30" /> <!-- Dedicated Drag Handle Row -->
-        <RowDefinition Height="*" />  <!-- Rest of the UI -->
+        <RowDefinition Height="30" />
+        <RowDefinition Height="*" />
     </Grid.RowDefinitions>
     
-    <!-- DRAG HANDLE: The only area used to move the window -->
     <Border Grid.Row="0" Background="#1AFFFFFF" CornerRadius="5" Cursor="SizeAll" MouseLeftButtonDown="DragHandle_MouseDown">
         <TextBlock Text="DRAG HERE" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#55FFFFFF" FontSize="10" FontFamily="./Fonts/#Poppins" FontWeight="Bold" IsHitTestVisible="False"/>
     </Border>
 
-    <!-- The original RootGrid containing the dynamic UI, now placed in Row 1 -->
+    <!-- Subdued Rotating Pokeball Watermark (Bottom Right) -->
+    <Grid Grid.Row="1" Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,15,65" Opacity="0.04" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+      <Grid.RenderTransform>
+        <RotateTransform x:Name="PokeballRotate" Angle="0"/>
+      </Grid.RenderTransform>
+      <Path Data="M 0,50 A 50,50 0 0,1 100,50 Z" Fill="White"/>
+      <Path Data="M 0,53 A 50,50 0 0,0 100,53 Z" Fill="White"/>
+      <Ellipse Width="30" Height="30" Fill="#1A1A1A" Stroke="White" StrokeThickness="5"/>
+      <Ellipse Width="10" Height="10" Fill="White"/>
+    </Grid>
+
     <Grid Name="RootGrid" Grid.Row="1" />
   </Grid>
 </Window>
