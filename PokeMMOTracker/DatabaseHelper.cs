@@ -94,6 +94,57 @@ public static class DatabaseHelper
 		return 1;
 	}
 
+	public static double GetRegionProgressPercentage(string dbPath, string charName, string regionName)
+	{
+	        string regionDb = regionName + "ProgressClass";
+	        string isDoneCol = charName + "IsDone";
+
+	        try 
+	        {
+	                using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
+	                connection.Open();
+	                using SQLiteCommand countAllCmd = new SQLiteCommand($"SELECT COUNT(*) FROM {regionDb};", connection);
+	                double total = Convert.ToDouble(countAllCmd.ExecuteScalar());
+
+	                if (total == 0) return 0.0;
+
+	                using SQLiteCommand countDoneCmd = new SQLiteCommand($"SELECT COUNT(*) FROM {regionDb} WHERE {isDoneCol} = 1;", connection);
+	                double done = Convert.ToDouble(countDoneCmd.ExecuteScalar());
+
+	                return (done / total) * 100.0;
+	        }
+	        catch { return 0.0; }
+	}
+
+	public static double GetTotalProgressPercentage(string dbPath, string charName)
+	{
+	        string[] regions = { "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova" };
+	        double totalAll = 0;
+	        double doneAll = 0;
+
+	        try
+	        {
+	                using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
+	                connection.Open();
+
+	                foreach (string region in regions)
+	                {
+	                        string regionDb = region + "ProgressClass";
+	                        string isDoneCol = charName + "IsDone";
+
+	                        using SQLiteCommand countAllCmd = new SQLiteCommand($"SELECT COUNT(*) FROM {regionDb};", connection);
+	                        totalAll += Convert.ToDouble(countAllCmd.ExecuteScalar());
+
+	                        using SQLiteCommand countDoneCmd = new SQLiteCommand($"SELECT COUNT(*) FROM {regionDb} WHERE {isDoneCol} = 1;", connection);
+	                        doneAll += Convert.ToDouble(countDoneCmd.ExecuteScalar());
+	                }
+
+	                if (totalAll == 0) return 0.0;
+	                return (doneAll / totalAll) * 100.0;
+	        }
+	        catch { return 0.0; }
+	}
+
 	public static void UpdateTaskStatus(string dbPath, string taskLabel, int newStatus, int progressId, string charName, string regionName, string regionDb)
 	{
 		using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");

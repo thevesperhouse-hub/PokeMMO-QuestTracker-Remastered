@@ -328,6 +328,9 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private void BuildUI()
 	{
+		// Cache current state to prevent jumping on rebuild
+		double currentScrollOffset = scrollViewer?.VerticalOffset ?? 0;
+
 		RootGrid.Children.Clear();
 		RootGrid.RowDefinitions.Clear();
 		taskBorders.Clear();
@@ -353,10 +356,66 @@ public partial class MainWindow : Window, IComponentConnector
 			FontSize = (int)Application.Current.Resources["FontSize"] + 4,
 			TextWrapping = TextWrapping.Wrap,
 			HorizontalAlignment = HorizontalAlignment.Stretch,
-			Margin = new Thickness(10.0, 15.0, 10.0, 15.0)
+			Margin = new Thickness(10.0, 15.0, 10.0, 5.0)
 		};
 		tasksPanel.Children.Add(titleText);
-		
+
+		// Calculate and Display Progress
+		double regionPct = DatabaseHelper.GetRegionProgressPercentage(_dbPath, _charName, _regionName);
+		double totalPct = DatabaseHelper.GetTotalProgressPercentage(_dbPath, _charName);
+
+		StackPanel progressPanel = new StackPanel { Margin = new Thickness(10.0, 0, 10.0, 15.0) };
+
+		// Region Progress
+		Grid regionGrid = new Grid { Margin = new Thickness(0, 0, 0, 5) };
+		ProgressBar regionBar = new ProgressBar 
+		{ 
+			Value = regionPct, 
+			Height = 12, 
+			Foreground = new SolidColorBrush(Color.FromRgb(100, 200, 100)),
+			Background = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50)),
+			BorderThickness = new Thickness(0)
+		};
+		TextBlock regionLabel = new TextBlock 
+		{ 
+			Text = $"{_regionName}: {regionPct:F1}%", 
+			Foreground = new SolidColorBrush(Colors.White), 
+			FontSize = 10, 
+			FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./Fonts/#Poppins"),
+			FontWeight = FontWeights.Bold,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center
+		};
+		regionGrid.Children.Add(regionBar);
+		regionGrid.Children.Add(regionLabel);
+		progressPanel.Children.Add(regionGrid);
+
+		// Global Progress
+		Grid globalGrid = new Grid();
+		ProgressBar globalBar = new ProgressBar 
+		{ 
+			Value = totalPct, 
+			Height = 12, 
+			Foreground = new SolidColorBrush(Color.FromRgb(100, 150, 255)),
+			Background = new SolidColorBrush(Color.FromArgb(100, 50, 50, 50)),
+			BorderThickness = new Thickness(0)
+		};
+		TextBlock globalLabel = new TextBlock 
+		{ 
+			Text = $"Global: {totalPct:F1}%", 
+			Foreground = new SolidColorBrush(Colors.White), 
+			FontSize = 10, 
+			FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./Fonts/#Poppins"),
+			FontWeight = FontWeights.Bold,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center
+		};
+		globalGrid.Children.Add(globalBar);
+		globalGrid.Children.Add(globalLabel);
+		progressPanel.Children.Add(globalGrid);
+
+		tasksPanel.Children.Add(progressPanel);
+
 		string regionDb = GetRegionDb();
 		if (regionDb == null) return;
 
@@ -385,12 +444,22 @@ public partial class MainWindow : Window, IComponentConnector
 			taskCheckBox.Checked += delegate
 			{
 				DatabaseHelper.UpdateTaskStatus(_dbPath, task.label, 1, progress.RegionId, _charName, _regionName, regionDb);
-				if (DatabaseHelper.CheckAndAdvanceProgress(_dbPath, _charName, _regionName, progress.RegionId, regionDb)) BuildUI();
+				if (DatabaseHelper.CheckAndAdvanceProgress(_dbPath, _charName, _regionName, progress.RegionId, regionDb))
+				{
+					selectedTaskIndex = 0;
+					isNavigatingBottomButtons = false;
+				}
+				BuildUI(); 
 			};
 			taskCheckBox.Unchecked += delegate
 			{
 				DatabaseHelper.UpdateTaskStatus(_dbPath, task.label, 0, progress.RegionId, _charName, _regionName, regionDb);
-				if (DatabaseHelper.CheckAndAdvanceProgress(_dbPath, _charName, _regionName, progress.RegionId, regionDb)) BuildUI();
+				if (DatabaseHelper.CheckAndAdvanceProgress(_dbPath, _charName, _regionName, progress.RegionId, regionDb))
+				{
+					selectedTaskIndex = 0;
+					isNavigatingBottomButtons = false;
+				}
+				BuildUI(); 
 			};
 			Grid.SetColumn(taskCheckBox, 0);
 			horizontalGrid.Children.Add(taskCheckBox);
@@ -470,14 +539,19 @@ public partial class MainWindow : Window, IComponentConnector
 		Grid.SetRow(buttonGrid, 1);
 		RootGrid.Children.Add(buttonGrid);
 
-		// ADD BUTTONS TO LIST FOR HIGHLIGHTING
 		bottomButtons.Clear();
 		bottomButtons.Add(previousButton);
 		bottomButtons.Add(switchCharacterButton);
 		bottomButtons.Add(nextButton);
 
-		selectedTaskIndex = 0; // Reset index on UI rebuild
+		// Restore state
 		UpdateSelectionVisuals();
+
+		// We must wait for the UI to be fully rendered before we can scroll
+		Dispatcher.BeginInvoke(new Action(() => 
+		{
+			scrollViewer.ScrollToVerticalOffset(currentScrollOffset);
+		}), DispatcherPriority.Loaded);
 	}
 
 	private void OnStateChanged(object sender, EventArgs e)

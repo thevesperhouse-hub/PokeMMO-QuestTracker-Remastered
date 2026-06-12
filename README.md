@@ -20,9 +20,23 @@ The clunky Windows title bar has been removed. The tracker now operates as a tru
 * **Resizeable:** Grab the bottom-right corner to scale the UI to your preference.
 * **Always on Top:** The UI stays pinned over PokeMMO without obstructing your view thanks to its dark, translucent aesthetic.
 
-### 3. Modern Aesthetics
+### 3. Modern Aesthetics & Progression
 * **Embedded Poppins Font:** The UI now exclusively uses the *Poppins* typeface, embedded directly into the application. No system installation required.
+* **Real-Time Progress Bars:** Two dynamic progress bars have been added below the title, showing your exact completion percentage for the current Region and your Global completion across the entire game.
 * **Rounded UI:** Checkboxes and task borders have been redesigned with a card-like appearance, increased padding, soft corner radii, and drop shadows for optimal readability.
+
+---
+
+## 📝 Changelog (v1.0 Remastered)
+* **[NEW]** Native SDL2 Controller Support (PS4/PS5, Switch, Xbox).
+* **[NEW]** Controller Mode UI State with visual highlighting and full D-Pad navigation (including bottom buttons).
+* **[NEW]** Auto-Focus toggling via L3+R3.
+* **[NEW]** Real-Time Regional and Global Progress Bars.
+* **[NEW]** Borderless, draggable, and transparent "Big Picture" overlay mode.
+* **[NEW]** Poppins font embedded into the assembly.
+* **[FIX]** Removed buggy `user32.dll` auto-snapping logic for multi-monitor stability.
+* **[FIX]** Fixed UI scroll jumping to the top when checking/unchecking a quest.
+* **[FIX]** Suppressed SQLite `DllNotFoundException` by ensuring database and interop DLLs are copied to the output directory.
 
 ---
 
