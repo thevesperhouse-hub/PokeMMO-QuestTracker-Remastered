@@ -26,3 +26,7 @@ System.Private.CoreLib.dll
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Debug / temp artifacts
+corehost_trace.log
+_test_icon.ico

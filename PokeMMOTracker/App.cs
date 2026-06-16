@@ -16,10 +16,20 @@ public partial class App : Application
 {
         protected override void OnStartup(StartupEventArgs e)
         {
-                // Global Exception Handlers
+                // Global Exception Handlers (before anything that can throw)
                 AppDomain.CurrentDomain.UnhandledException += (s, args) => LogCrash(args.ExceptionObject as Exception);
                 DispatcherUnhandledException += (s, args) => { LogCrash(args.Exception); args.Handled = true; };
                 TaskScheduler.UnobservedTaskException += (s, args) => LogCrash(args.Exception);
+
+                try
+                {
+                        NativeBootstrap.EnsureSdl2();
+                }
+                catch (Exception ex)
+                {
+                        LogCrash(ex);
+                        return;
+                }
 
                 base.OnStartup(e);
 

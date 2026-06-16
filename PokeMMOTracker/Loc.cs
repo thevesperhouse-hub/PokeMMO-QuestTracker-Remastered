@@ -72,14 +72,23 @@ public static class Loc
 
 	public static string CreateCharacterTitle => Pick("Create character", "Créer un personnage");
 	public static string CharacterNameLabel => Pick("Character name", "Nom du personnage");
+	public static string KeyboardHint => Pick("D-pad: move · A: type · OK or ↓: next field", "Manette : bouger · A : taper · OK ou ↓ : champ suivant");
 	public static string StartingRegionLabel => Pick("Starting region", "Région de départ");
+	public static string AvatarLabel => Pick("Trainer avatar", "Avatar dresseur");
+	public static string AvatarPickToolTip => Pick("Choose avatar", "Choisir un avatar");
+	public static string AvatarPickerTitle => Pick("Choose your avatar", "Choisir ton avatar");
+	public static string PlayToolTip => Pick("Open tracker", "Ouvrir le tracker");
 	public static string SelectRegion => Pick("Select a region…", "Choisir une région…");
 	public static string Continue => Pick("Continue", "Continuer");
 	public static string Back => Pick("Back", "Retour");
 	public static string ErrSelectRegion => Pick("Please select a starting region.", "Choisis une région de départ.");
 	public static string ErrNameRequired => Pick("Your character needs a name.", "Ton personnage doit avoir un nom.");
 	public static string ErrNameInvalid => Pick("Name cannot contain spaces or special characters.", "Le nom ne peut pas contenir des espaces ou caractères spéciaux.");
+	public static string ErrNameTaken => Pick("This name is already in use.", "Ce nom est déjà utilisé.");
+	public static string ErrRenameFailed => Pick("Could not rename character.", "Impossible de renommer le personnage.");
 	public static string DialogWindowTitle => Pick("New character", "Nouveau personnage");
+	public static string RenameCharacterTitle => Pick("Rename character", "Renommer le personnage");
+	public static string RenameCharacterToolTip => Pick("Rename", "Renommer");
 
 	public static string NewCharacter => Pick("+ New character", "+ Nouveau personnage");
 	public static string ThemeSettings => Pick("Theme", "Thème");

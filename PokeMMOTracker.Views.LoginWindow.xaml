@@ -8,13 +8,13 @@
 
         Title="PokeMMO-QT"
 
-        Height="680"
+        Height="720"
 
-        Width="840"
+        Width="920"
 
-        MinHeight="620"
+        MinHeight="640"
 
-        MinWidth="760"
+        MinWidth="880"
 
         Background="#CC1A1A1A"
 
@@ -208,7 +208,9 @@
 
 
 
-    <ScrollViewer Grid.Row="1"
+    <Grid Grid.Row="1">
+
+      <ScrollViewer Name="CardsScroller"
 
                   VerticalScrollBarVisibility="Auto"
 
@@ -218,9 +220,17 @@
 
                   Padding="0,0,2,8">
 
-      <WrapPanel Name="CardsPanel" Orientation="Horizontal" HorizontalAlignment="Center"/>
+      <StackPanel Name="CardsPanel" HorizontalAlignment="Center"/>
 
     </ScrollViewer>
+
+      <Border Name="NavHighlightRing" Visibility="Collapsed" IsHitTestVisible="False"
+
+              BorderBrush="#FFCC00" BorderThickness="3" CornerRadius="8"
+
+              Background="#443D6B9E" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+    </Grid>
 
 
 

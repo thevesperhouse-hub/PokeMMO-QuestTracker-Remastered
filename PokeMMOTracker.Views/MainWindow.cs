@@ -191,6 +191,7 @@ public partial class MainWindow : Window, IComponentConnector
 	private DispatcherTimer _geometrySaveTimer;
 
 	// Header buttons (view toggle, bind) — controller-navigable.
+	private enum HeaderButtonKind { ViewMode, Hub, Bind, Narrator }
 	private List<Button> headerButtons = new List<Button>();
 	private bool isNavigatingHeaderButtons = false;
 	private int selectedHeaderIndex = 0;
@@ -198,6 +199,9 @@ public partial class MainWindow : Window, IComponentConnector
 	private bool previousYState = false;
 	private bool _pulseRegionBar = false;
 	private bool _scheduleNarrateAfterLayout = false;
+	private bool _bindWindowOpen = false;
+	private Button _bindHeaderButton;
+	private BindWindow _activeBindWindow;
 
 	public MainWindow(string charName, string regionName)
 	{
@@ -628,10 +632,7 @@ public partial class MainWindow : Window, IComponentConnector
 					if (aPressed && !previousAState)
 					{
 						if (isNavigatingHeaderButtons)
-						{
-							if (selectedHeaderIndex >= 0 && selectedHeaderIndex < headerButtons.Count)
-								headerButtons[selectedHeaderIndex].RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-						}
+							ActivateSelectedHeaderButton();
 						else if (!isNavigatingBottomButtons)
 						{
 							if (selectedTaskIndex >= 0 && selectedTaskIndex < taskCheckBoxes.Count)
@@ -642,10 +643,8 @@ public partial class MainWindow : Window, IComponentConnector
 						else
 						{
 							if (selectedButtonIndex >= 0 && selectedButtonIndex < bottomButtons.Count)
-							{
-								// Programmatically click the button
-								bottomButtons[selectedButtonIndex].RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
-							}
+								bottomButtons[selectedButtonIndex].RaiseEvent(
+									new RoutedEventArgs(ButtonBase.ClickEvent, bottomButtons[selectedButtonIndex]));
 						}
 					}
 
@@ -988,34 +987,139 @@ public partial class MainWindow : Window, IComponentConnector
 		_uncheckButton = Settings.Default.UncheckButton;
 	}
 
+	private void ActivateSelectedHeaderButton()
+	{
+		if (selectedHeaderIndex < 0 || selectedHeaderIndex >= headerButtons.Count) return;
+
+		Button btn = headerButtons[selectedHeaderIndex];
+
+		// Bind uses a separate window — always hit the dedicated path (Tag/RaiseEvent can miss).
+		if (btn == _bindHeaderButton)
+		{
+			OpenBindWindow();
+			return;
+		}
+
+		if (btn.Tag is HeaderButtonKind kind)
+		{
+			switch (kind)
+			{
+				case HeaderButtonKind.ViewMode:
+					CycleViewMode();
+					break;
+				case HeaderButtonKind.Hub:
+					SaveWindowGeometry();
+					new LoginWindow().Show();
+					Close();
+					break;
+				case HeaderButtonKind.Bind:
+					OpenBindWindow();
+					break;
+				case HeaderButtonKind.Narrator:
+					if (QuestNarrator.IsSpeaking)
+						QuestNarrator.Stop();
+					else
+						NarrateCurrentQuest();
+					break;
+			}
+			return;
+		}
+
+		btn.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, btn));
+	}
+
 	private void OpenBindWindow()
 	{
-		try
+		if (_activeBindWindow != null)
 		{
-			_suspendController = true;          // pause controller handling
-			topmostTimer?.Stop();               // let the dialog sit above the overlay
 			try
 			{
-				// Disable the global shortcuts while capturing, so pressing the
-				// current combo doesn't actually validate/undo a quest.
+				_activeBindWindow.Activate();
+				IntPtr hwnd = new WindowInteropHelper(_activeBindWindow).Handle;
+				if (hwnd != IntPtr.Zero) ForceForeground(hwnd);
+				return;
+			}
+			catch
+			{
+				_activeBindWindow = null;
+				_bindWindowOpen = false;
+			}
+		}
+
+		if (_bindWindowOpen) return;
+		OpenBindWindowCore();
+	}
+
+	private void OpenBindWindowCore()
+	{
+		if (_bindWindowOpen) return;
+
+		try
+		{
+			_bindWindowOpen = true;
+			_suspendController = true;
+			topmostTimer?.Stop();
+			try
+			{
 				HotkeyManager.Current.Remove("Check");
 				HotkeyManager.Current.Remove("Uncheck");
 			}
 			catch { }
 
-			BindWindow w = new BindWindow(gameController) { Owner = this, Topmost = true };
-			w.ShowDialog();
+			ForceForeground(new WindowInteropHelper(this).Handle);
 
-			ApplyKeyboardBinds();
-			ApplyControllerBinds();
-			BuildUI();
+			BindWindow w = new BindWindow(gameController)
+			{
+				Topmost = true,
+				ShowInTaskbar = false,
+				ShowActivated = true,
+				Opacity = 1,
+				WindowStartupLocation = WindowStartupLocation.Manual
+			};
+
+			double wWidth = w.Width > 0 ? w.Width : 420;
+			double wHeight = w.Height > 0 ? w.Height : 380;
+			w.Left = Left + (ActualWidth - wWidth) / 2;
+			w.Top = Top + (ActualHeight - wHeight) / 2;
+
+			_activeBindWindow = w;
+
+			void Cleanup()
+			{
+				_activeBindWindow = null;
+				_bindWindowOpen = false;
+				_suspendController = false;
+				topmostTimer?.Start();
+				ApplyKeyboardBinds();
+				ApplyControllerBinds();
+				BuildUI();
+				EnsureTopmost();
+			}
+
+			w.Closed += delegate { Cleanup(); };
+			w.ContentRendered += delegate
+			{
+				try
+				{
+					IntPtr hwnd = new WindowInteropHelper(w).Handle;
+					if (hwnd != IntPtr.Zero)
+						ForceForeground(hwnd);
+				}
+				catch { }
+			};
+
+			w.Show();
+			TrackerLog.Info("Bind window opened");
 		}
-		catch { }
-		finally
+		catch (Exception ex)
 		{
+			_activeBindWindow = null;
+			_bindWindowOpen = false;
 			_suspendController = false;
 			topmostTimer?.Start();
-			EnsureTopmost();
+			TrackerLog.Error("OpenBindWindow: " + ex);
+			MessageBox.Show(Loc.Pick("Could not open bind settings.", "Impossible d'ouvrir les binds."),
+				Loc.BindTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
 		}
 	}
 
@@ -1081,24 +1185,18 @@ public partial class MainWindow : Window, IComponentConnector
 		headerCardGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(48) });
 		headerCardGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-		if (AppAssets.HasHubAvatar(_charName))
+		string avatarId = CharacterPrefs.GetAvatar(_charName);
+		Image avatarImage = new Image
 		{
-			Image avatarImage = new Image
-			{
-				Source = AppAssets.AvatarCropped,
-				Width = 42,
-				Height = 42,
-				Stretch = Stretch.UniformToFill,
-				Margin = new Thickness(0, 0, 8, 0),
-				VerticalAlignment = VerticalAlignment.Top
-			};
-			Grid.SetColumn(avatarImage, 0);
-			headerCardGrid.Children.Add(avatarImage);
-		}
-		else
-		{
-			headerCardGrid.ColumnDefinitions[0].Width = new GridLength(0);
-		}
+			Source = AppAssets.GetAvatarCropped(avatarId),
+			Width = 42,
+			Height = 42,
+			Stretch = Stretch.UniformToFill,
+			Margin = new Thickness(0, 0, 8, 0),
+			VerticalAlignment = VerticalAlignment.Top
+		};
+		Grid.SetColumn(avatarImage, 0);
+		headerCardGrid.Children.Add(avatarImage);
 
 		StackPanel infoStack = new StackPanel();
 		infoStack.Children.Add(new TextBlock
@@ -1136,6 +1234,7 @@ public partial class MainWindow : Window, IComponentConnector
 
 		Button viewModeButton = new Button
 		{
+			Tag = HeaderButtonKind.ViewMode,
 			Style = (Style)FindResource("ModernButton"),
 			Content = GetViewModeButtonContent(),
 			FontSize = 12,
@@ -1149,6 +1248,7 @@ public partial class MainWindow : Window, IComponentConnector
 
 		Button hubButton = new Button
 		{
+			Tag = HeaderButtonKind.Hub,
 			Style = (Style)FindResource("ModernButton"),
 			Content = "⌂",
 			FontSize = 12,
@@ -1167,14 +1267,17 @@ public partial class MainWindow : Window, IComponentConnector
 
 		Button bindButton = new Button
 		{
+			Tag = HeaderButtonKind.Bind,
 			Style = (Style)FindResource("ModernButton"),
 			Content = "⌨",
 			FontSize = 13,
 			Width = 30.0,
 			Height = 26.0,
 			Padding = new Thickness(0),
+			Margin = new Thickness(0, 0, 4, 0),
 			ToolTip = Loc.BindToolTip
 		};
+		_bindHeaderButton = bindButton;
 		bindButton.Click += delegate { OpenBindWindow(); };
 
 		headerButtons.Add(viewModeButton);
@@ -1186,6 +1289,7 @@ public partial class MainWindow : Window, IComponentConnector
 		{
 			narratorButton = new Button
 			{
+				Tag = HeaderButtonKind.Narrator,
 				Style = (Style)FindResource("ModernButton"),
 				Content = "🔊",
 				FontSize = 12,
@@ -1450,8 +1554,6 @@ public partial class MainWindow : Window, IComponentConnector
 		};
 		switchCharacterButton.Click += delegate
 		{
-			Settings.Default.LastUser = "";
-			Settings.Default.LastRegion = "";
 			Settings.Default.RememberMe = false;
 			Settings.Default.Save();
 			new LoginWindow().Show();

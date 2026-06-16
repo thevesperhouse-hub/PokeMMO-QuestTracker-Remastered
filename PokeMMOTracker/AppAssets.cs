@@ -8,19 +8,17 @@ public static class AppAssets
 {
 	private static readonly Uri Base = new Uri("pack://application:,,,/");
 
-	// Characters with a custom hub avatar (expand as you add more art per char).
-	private static readonly string[] HubAvatarCharacters = { "UltimateFa" };
-
-	public static bool HasHubAvatar(string charName)
+	public static ImageSource GetAvatarFull(string avatarId)
 	{
-		if (string.IsNullOrEmpty(charName)) return false;
-		foreach (string n in HubAvatarCharacters)
-			if (n == charName) return true;
-		return false;
+		AvatarCatalog.Entry entry = AvatarCatalog.Find(avatarId) ?? AvatarCatalog.Find(AvatarCatalog.DefaultId)!;
+		return LoadPng("Assets/" + entry.FullFile);
 	}
 
-	public static ImageSource AvatarFull => LoadPng("Assets/avatar_full.png");
-	public static ImageSource AvatarCropped => LoadPng("Assets/avatar_cropped.png");
+	public static ImageSource GetAvatarCropped(string avatarId)
+	{
+		AvatarCatalog.Entry entry = AvatarCatalog.Find(avatarId) ?? AvatarCatalog.Find(AvatarCatalog.DefaultId)!;
+		return LoadPng("Assets/" + entry.CroppedFile);
+	}
 
 	public static ImageSource AppIcon
 	{
@@ -30,9 +28,14 @@ public static class AppAssets
 				new Uri(Base, "app.ico"),
 				BitmapCreateOptions.None,
 				BitmapCacheOption.OnLoad);
-			var frame = decoder.Frames[0];
-			frame.Freeze();
-			return frame;
+
+			BitmapFrame best = decoder.Frames[0];
+			foreach (BitmapFrame frame in decoder.Frames)
+				if (frame.PixelWidth > best.PixelWidth)
+					best = frame;
+
+			best.Freeze();
+			return best;
 		}
 	}
 

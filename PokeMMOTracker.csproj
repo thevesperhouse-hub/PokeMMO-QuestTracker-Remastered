@@ -2,12 +2,17 @@
   <PropertyGroup>
     <AssemblyName>PokeMMOTracker</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>False</GenerateTargetFrameworkAttribute>
     <OutputType>WinExe</OutputType>
     <UseWPF>True</UseWPF>
     <TargetFramework>net8.0-windows</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <RootNamespace />
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
@@ -20,8 +25,7 @@
   <ItemGroup>
     <Resource Include="Fonts\Poppins-Regular.ttf" />
     <Resource Include="Fonts\Poppins-Bold.ttf" />
-    <Resource Include="Assets\avatar_full.png" />
-    <Resource Include="Assets\avatar_cropped.png" />
+    <Resource Include="Assets\avatar*.png" />
     <Resource Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -36,8 +40,17 @@
     </None>
     <None Include="SDL2\SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       <Link>SDL2.dll</Link>
     </None>
+    <EmbeddedResource Include="SDL2\SDL2.dll" LogicalName="SDL2.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="PokeMMOTracker.Avalonia\**" />
+    <None Remove="PokeMMOTracker.Avalonia\**" />
+    <EmbeddedResource Remove="PokeMMOTracker.Avalonia\**" />
+    <Page Remove="PokeMMOTracker.Avalonia\**" />
+    <ApplicationDefinition Remove="PokeMMOTracker.Avalonia\**" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Data.SQLite">

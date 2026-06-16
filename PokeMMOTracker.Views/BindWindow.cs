@@ -33,9 +33,14 @@ public class BindWindow : Window
 	private Button _uncheckKeyBtn;
 	private Button _checkPadBtn;
 	private Button _uncheckPadBtn;
+	private Button _closeBtn;
+	private Button _resetBtn;
+	private Button _saveBtn;
+	private Button _cancelBtn;
 
 	private DispatcherTimer _padTimer;
 	private bool[] _padBaseline;
+	private ControllerGroupNav _padNav;
 
 	private static readonly SolidColorBrush CardEven = new SolidColorBrush(Color.FromArgb(0x66, 0x11, 0x11, 0x11));
 	private static readonly SolidColorBrush CardOdd = new SolidColorBrush(Color.FromArgb(0x66, 0x1A, 0x1A, 0x1A));
@@ -61,21 +66,51 @@ public class BindWindow : Window
 		Background = Brushes.Transparent;
 		Foreground = Brushes.White;
 		FontFamily = _poppins;
-		Opacity = 0;
+		Opacity = 1;
 
 		LoadFromSettings();
 		BuildUi();
 
 		PreviewKeyDown += BindWindow_PreviewKeyDown;
-		Loaded += delegate
+		Loaded += OnBindWindowLoaded;
+		Closed += delegate { _padTimer?.Stop(); _padNav?.Dispose(); };
+	}
+
+	private void OnBindWindowLoaded(object sender, RoutedEventArgs e)
+	{
+		if (Opacity < 0.99)
 		{
 			var fade = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(280))
 			{
 				EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
 			};
 			BeginAnimation(OpacityProperty, fade);
-		};
-		Closed += delegate { _padTimer?.Stop(); };
+		}
+
+		RebuildControllerNav();
+	}
+
+	private void RebuildControllerNav()
+	{
+		_padNav?.Dispose();
+		_padNav = new ControllerGroupNav(_controller);
+
+		_padNav.AddButton(_closeBtn);
+
+		_padNav.AddGroup(
+			(_checkKeyBtn, () => StartCapture(CaptureTarget.CheckKey)),
+			(_checkPadBtn, () => StartCapture(CaptureTarget.CheckButton)));
+
+		_padNav.AddGroup(
+			(_uncheckKeyBtn, () => StartCapture(CaptureTarget.UncheckKey)),
+			(_uncheckPadBtn, () => StartCapture(CaptureTarget.UncheckButton)));
+
+		_padNav.AddGroup(
+			(_resetBtn, () => ResetDefaults()),
+			(_saveBtn, () => SaveAndClose()),
+			(_cancelBtn, () => Close()));
+
+		_padNav.FocusFirst();
 	}
 
 	private void LoadFromSettings()
@@ -126,6 +161,7 @@ public class BindWindow : Window
 			HorizontalAlignment = HorizontalAlignment.Center
 		};
 		Button closeBtn = MakeIconButton("✕", 26, delegate { Close(); });
+		_closeBtn = closeBtn;
 		closeBtn.HorizontalAlignment = HorizontalAlignment.Right;
 		closeBtn.VerticalAlignment = VerticalAlignment.Top;
 		closeBtn.Margin = new Thickness(0, -4, -4, 0);
@@ -167,10 +203,13 @@ public class BindWindow : Window
 			Margin = new Thickness(0, 16, 0, 0)
 		};
 		Button resetBtn = MakeActionButton(Loc.Reset, false);
+		_resetBtn = resetBtn;
 		resetBtn.Click += delegate { ResetDefaults(); };
 		Button saveBtn = MakeActionButton(Loc.Save, true);
+		_saveBtn = saveBtn;
 		saveBtn.Click += delegate { SaveAndClose(); };
 		Button cancelBtn = MakeActionButton(Loc.Close, false);
+		_cancelBtn = cancelBtn;
 		cancelBtn.Click += delegate { Close(); };
 		actions.Children.Add(resetBtn);
 		actions.Children.Add(saveBtn);
@@ -352,6 +391,7 @@ public class BindWindow : Window
 	{
 		CancelCapture();
 		_capturing = target;
+		_padNav?.SetEnabled(false);
 
 		if (target == CaptureTarget.CheckKey)
 		{
@@ -369,6 +409,7 @@ public class BindWindow : Window
 			{
 				MessageBox.Show(Loc.NoController, Loc.BindTitle, MessageBoxButton.OK, MessageBoxImage.Information);
 				_capturing = CaptureTarget.None;
+				_padNav?.SetEnabled(true);
 				return;
 			}
 			Button padBtn = target == CaptureTarget.CheckButton ? _checkPadBtn : _uncheckPadBtn;
@@ -383,6 +424,7 @@ public class BindWindow : Window
 		_padTimer?.Stop();
 		_capturing = CaptureTarget.None;
 		RefreshLabels();
+		_padNav?.SetEnabled(true);
 	}
 
 	private void RefreshLabels()
@@ -395,6 +437,8 @@ public class BindWindow : Window
 		SetBindButtonCapturing(_uncheckKeyBtn, false);
 		SetBindButtonCapturing(_checkPadBtn, false);
 		SetBindButtonCapturing(_uncheckPadBtn, false);
+		if (_capturing == CaptureTarget.None)
+			_padNav?.SetEnabled(true);
 	}
 
 	private void BindWindow_PreviewKeyDown(object sender, KeyEventArgs e)

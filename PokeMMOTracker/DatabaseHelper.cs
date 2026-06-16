@@ -134,6 +134,87 @@ public static class DatabaseHelper
 		return names;
 	}
 
+	public static bool CharacterExists(string dbPath, string name)
+	{
+		try
+		{
+			using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
+			connection.Open();
+			using SQLiteCommand command = new SQLiteCommand("SELECT 1 FROM UserClass WHERE Name = @Name LIMIT 1;", connection);
+			command.Parameters.AddWithValue("@Name", name);
+			return command.ExecuteScalar() != null;
+		}
+		catch { return false; }
+	}
+
+	public static bool IsValidCharacterName(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name) || name.Length > 16) return false;
+		if (name.Contains(' ')) return false;
+		foreach (char c in name)
+			if (!char.IsLetterOrDigit(c)) return false;
+		return true;
+	}
+
+	public static bool RenameCharacter(string dbPath, string oldName, string newName)
+	{
+		if (oldName == newName) return true;
+		if (!IsValidCharacterName(newName)) return false;
+		if (CharacterExists(dbPath, newName)) return false;
+		if (!CharacterExists(dbPath, oldName)) return false;
+
+		string[] progressTables = { "KantoProgressClass", "JohtoProgressClass", "HoennProgressClass", "SinnohProgressClass", "UnovaProgressClass" };
+		string[] classTables = { "KantoClass", "JohtoClass", "HoennClass", "SinnohClass", "UnovaClass" };
+
+		try
+		{
+			using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
+			connection.Open();
+			using SQLiteTransaction tx = connection.BeginTransaction();
+
+			using (SQLiteCommand updateUser = new SQLiteCommand("UPDATE UserClass SET Name = @newName WHERE Name = @oldName;", connection, tx))
+			{
+				updateUser.Parameters.AddWithValue("@newName", newName);
+				updateUser.Parameters.AddWithValue("@oldName", oldName);
+				if (updateUser.ExecuteNonQuery() != 1)
+				{
+					tx.Rollback();
+					return false;
+				}
+			}
+
+			string oldCol = oldName + "IsDone";
+			string newCol = newName + "IsDone";
+			foreach (string table in progressTables)
+				RenameColumnIfExists(connection, tx, table, oldCol, newCol);
+			foreach (string table in classTables)
+				RenameColumnIfExists(connection, tx, table, oldCol, newCol);
+
+			tx.Commit();
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	private static void RenameColumnIfExists(SQLiteConnection connection, SQLiteTransaction tx, string table, string oldCol, string newCol)
+	{
+		try
+		{
+			using SQLiteCommand check = new SQLiteCommand($"SELECT {oldCol} FROM {table} LIMIT 1;", connection, tx);
+			check.ExecuteScalar();
+		}
+		catch (SQLiteException)
+		{
+			return;
+		}
+
+		using SQLiteCommand rename = new SQLiteCommand($"ALTER TABLE {table} RENAME COLUMN {oldCol} TO {newCol};", connection, tx);
+		rename.ExecuteNonQuery();
+	}
+
 	public static CharacterDashboardInfo GetCharacterDashboardInfo(string dbPath, string charName)
 	{
 		CharacterDashboardInfo info = new CharacterDashboardInfo { Name = charName };
