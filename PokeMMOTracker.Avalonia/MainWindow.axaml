@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PokeMMOTracker.Avalonia.MainWindow"
+        Title="PokeMMO-QT"
+        Width="520"
+        Height="420"
+        Background="#1A1A1A">
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="PokeMMO-QT"
+               FontSize="26"
+               FontWeight="Bold"
+               Foreground="White" />
+    <TextBlock Text="Linux / cross-platform preview"
+               FontSize="13"
+               Foreground="#A0D0FF" />
+    <TextBlock TextWrapping="Wrap"
+               Foreground="#CCCCCC"
+               FontSize="12"
+               Text="This Avalonia shell is the future Linux (and cross-platform) UI. The Windows WPF overlay remains the full app for now. Next steps: shared core, hub, quest tracker, SDL2 controller." />
+    <Border Background="#33111111"
+            BorderBrush="#55FFFFFF"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="12">
+      <TextBlock x:Name="PlatformInfo"
+                 TextWrapping="Wrap"
+                 Foreground="#99DDDDDD"
+                 FontSize="11" />
+    </Border>
+    <TextBlock Text="Build: dotnet build PokeMMOTracker.Avalonia -c Release"
+               FontSize="10"
+               Foreground="#666666" />
+  </StackPanel>
+</Window>

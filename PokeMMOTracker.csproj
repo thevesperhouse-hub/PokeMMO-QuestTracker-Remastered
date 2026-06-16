@@ -6,15 +6,13 @@
     <UseWPF>True</UseWPF>
     <TargetFramework>net8.0-windows</TargetFramework>
     <PlatformTarget>x64</PlatformTarget>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <RootNamespace />
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>app.ico</ApplicationIcon>
-    <RootNamespace />
   </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Include="PokeMMOTracker.App.xaml" />
@@ -22,8 +20,12 @@
   <ItemGroup>
     <Resource Include="Fonts\Poppins-Regular.ttf" />
     <Resource Include="Fonts\Poppins-Bold.ttf" />
+    <Resource Include="Assets\avatar_full.png" />
+    <Resource Include="Assets\avatar_cropped.png" />
+    <Resource Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.ico" />
     <None Remove="PokeMMOTracker.Resources.PokeMMODb.db" />
     <EmbeddedResource Include="PokeMMOTracker.Resources.PokeMMODb.db" LogicalName="PokeMMOTracker.Resources.PokeMMODb.db" />
     <None Include="Resources\PokeMMODb.db">
@@ -31,6 +33,10 @@
     </None>
     <None Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SDL2\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>SDL2.dll</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -49,5 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SDL2-CS.NetCore" Version="2.0.8" />
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+    <PackageReference Include="SayIt" Version="1.0.7" />
   </ItemGroup>
 </Project>

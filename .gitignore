@@ -1,6 +1,10 @@
 # Build folders
 bin/
 obj/
+publish/
+
+# Temp / debug images
+_final*.png
 
 # Large binaries
 *.exe

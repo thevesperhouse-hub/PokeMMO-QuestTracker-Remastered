@@ -55,22 +55,46 @@ public static class DatabaseHelper
 				showUserProgress.RegionId = reader.GetInt32(0);
 			}
 		}
-		using (SQLiteCommand command2 = new SQLiteCommand($"SELECT Title FROM {regionName}Class WHERE {regionName}Id = @Progress;", connection))
+		using (SQLiteCommand command2 = new SQLiteCommand($"SELECT {(AppConfig.Language == "FR" ? "Title_FR" : "Title")} FROM {regionName}Class WHERE {regionName}Id = @Progress;", connection))
 		{
 			command2.Parameters.AddWithValue("@Progress", showUserProgress.RegionId);
 			using SQLiteDataReader reader2 = command2.ExecuteReader();
 			while (reader2.Read())
 			{
-				showUserProgress.Title = reader2.GetString(0);
+				try { showUserProgress.Title = reader2.GetString(0); }
+				catch { showUserProgress.Title = "Missing Translation"; }
 			}
 		}
-		using (SQLiteCommand command3 = new SQLiteCommand($"SELECT TaskLabel, {charName}IsDone FROM {region}Class WHERE {regionName}Id = @Progress;", connection))
+		
+		string labelColumn = AppConfig.Language == "FR" ? "TaskLabel_FR" : "TaskLabel";
+		
+		// Auto-heal missing user columns
+		try 
+		{
+			using (SQLiteCommand checkCmd = new SQLiteCommand($"SELECT {charName}IsDone FROM {region}Class LIMIT 1;", connection))
+			{
+				checkCmd.ExecuteScalar();
+			}
+		} 
+		catch (SQLiteException) 
+		{
+			// Column is missing, create it dynamically
+			using (SQLiteCommand alterCmd = new SQLiteCommand($"ALTER TABLE {region}Class ADD COLUMN {charName}IsDone INTEGER DEFAULT 0;", connection))
+			{
+				alterCmd.ExecuteNonQuery();
+			}
+		}
+
+		using (SQLiteCommand command3 = new SQLiteCommand($"SELECT {labelColumn}, {charName}IsDone FROM {region}Class WHERE {regionName}Id = @Progress;", connection))
 		{
 			command3.Parameters.AddWithValue("@Progress", showUserProgress.RegionId);
 			using SQLiteDataReader reader3 = command3.ExecuteReader();
 			while (reader3.Read())
 			{
-				string label = reader3.GetString(0);
+				string label;
+				try { label = reader3.IsDBNull(0) ? "Missing Translation" : reader3.GetString(0); }
+				catch { label = "Missing Translation"; }
+				
 				int isDone = reader3.GetInt32(1);
 				list.Add((label, isDone));
 			}
@@ -92,6 +116,57 @@ public static class DatabaseHelper
 			return Convert.ToInt32(result);
 		}
 		return 1;
+	}
+
+	public static List<string> GetAllCharacterNames(string dbPath)
+	{
+		List<string> names = new List<string>();
+		try
+		{
+			using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
+			connection.Open();
+			using SQLiteCommand command = new SQLiteCommand("SELECT Name FROM UserClass ORDER BY Name;", connection);
+			using SQLiteDataReader reader = command.ExecuteReader();
+			while (reader.Read())
+				names.Add(reader.GetString(0));
+		}
+		catch { }
+		return names;
+	}
+
+	public static CharacterDashboardInfo GetCharacterDashboardInfo(string dbPath, string charName)
+	{
+		CharacterDashboardInfo info = new CharacterDashboardInfo { Name = charName };
+		string[] regions = { "Kanto", "Johto", "Hoenn", "Sinnoh", "Unova" };
+
+		info.GlobalPercent = GetTotalProgressPercentage(dbPath, charName);
+		foreach (string region in regions)
+			info.RegionPercents[region] = GetRegionProgressPercentage(dbPath, charName, region);
+
+		string activeRegion = CharacterPrefs.GetLastRegion(charName);
+		if (!info.RegionPercents.ContainsKey(activeRegion))
+			activeRegion = "Kanto";
+
+		info.ActiveRegion = activeRegion;
+		ShowUserProgress progress = GetUserProgress(dbPath, charName, activeRegion);
+		info.ActiveZoneTitle = progress.Title ?? "";
+		info.ActiveZoneStep = progress.RegionId;
+
+		if (progress.labels != null)
+		{
+			foreach (var task in progress.labels)
+			{
+				if (task.Item2 != 1)
+				{
+					info.CurrentQuest = task.Item1;
+					break;
+				}
+			}
+			if (info.CurrentQuest == null && progress.labels.Count > 0)
+				info.CurrentQuest = progress.labels[progress.labels.Count - 1].Item1;
+		}
+
+		return info;
 	}
 
 	public static double GetRegionProgressPercentage(string dbPath, string charName, string regionName)
@@ -147,9 +222,10 @@ public static class DatabaseHelper
 
 	public static void UpdateTaskStatus(string dbPath, string taskLabel, int newStatus, int progressId, string charName, string regionName, string regionDb)
 	{
+		string labelColumn = AppConfig.Language == "FR" ? "TaskLabel_FR" : "TaskLabel";
 		using SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbPath + ";Version=3;");
 		connection.Open();
-		using SQLiteCommand command = new SQLiteCommand($"UPDATE {regionDb}Class SET {charName}IsDone = @isDone WHERE {regionName}Id = @Progress AND TaskLabel = @TaskLabel;", connection);
+		using SQLiteCommand command = new SQLiteCommand($"UPDATE {regionDb}Class SET {charName}IsDone = @isDone WHERE {regionName}Id = @Progress AND {labelColumn} = @TaskLabel;", connection);
 		command.Parameters.AddWithValue("@isDone", newStatus);
 		command.Parameters.AddWithValue("@Progress", progressId);
 		command.Parameters.AddWithValue("@TaskLabel", taskLabel);
@@ -217,8 +293,15 @@ public static class DatabaseHelper
 		};
 		for (int i = 0; i < array.Length; i++)
 		{
-			using SQLiteCommand command3 = new SQLiteCommand(array[i], connection);
-			command3.ExecuteNonQuery();
+			try 
+			{
+				using SQLiteCommand command3 = new SQLiteCommand(array[i], connection);
+				command3.ExecuteNonQuery();
+			}
+			catch (SQLiteException)
+			{
+				// Ignore duplicate column exception if it already exists from a legacy save
+			}
 		}
 	}
 

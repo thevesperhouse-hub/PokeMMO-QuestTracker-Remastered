@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Resources;
 
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
-[assembly: AssemblyAssociatedContentFile("resources/pokemmotrackerlogoround.ico")]
 [assembly: AssemblyCompany("PokeMMOTracker")]
 [assembly: AssemblyConfiguration("Release")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

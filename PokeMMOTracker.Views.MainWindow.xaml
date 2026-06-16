@@ -1,15 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Window x:Class="PokeMMOTracker.Views.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:PokeMMOTracker.Views" xmlns:vm="clr-namespace:PokeMMOTracker.Views" Background="#01000000" Title="PokeMMO Tracker" Height="500" Width="370" FontFamily="./Fonts/#Poppins" Foreground="White" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip">
   <Window.Resources>
-    <!-- Smooth Animated Button Style -->
+    <!-- Semi-transparent buttons — same floating glass look as quest cards -->
     <Style x:Key="ModernButton" TargetType="Button">
-      <Setter Property="Background" Value="#333333"/>
-      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Background" Value="#661A1A1A"/>
+      <Setter Property="Foreground" Value="#DDDDDD"/>
       <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="BorderBrush" Value="#55FFFFFF"/>
+      <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="20" BorderBrush="#555555" BorderThickness="1" RenderTransformOrigin="0.5,0.5">
+            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" RenderTransformOrigin="0.5,0.5">
               <Border.RenderTransform>
                 <ScaleTransform x:Name="scale" ScaleX="1" ScaleY="1"/>
               </Border.RenderTransform>
@@ -20,16 +22,18 @@
                 <Trigger.EnterActions>
                   <BeginStoryboard>
                     <Storyboard>
-                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#444444" Duration="0:0:0.15"/>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.15"/>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.15"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#991A1A1A" Duration="0:0:0.15"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#AAFFFFFF" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.04" Duration="0:0:0.15"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.04" Duration="0:0:0.15"/>
                     </Storyboard>
                   </BeginStoryboard>
                 </Trigger.EnterActions>
                 <Trigger.ExitActions>
                   <BeginStoryboard>
                     <Storyboard>
-                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#333333" Duration="0:0:0.15"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#661A1A1A" Duration="0:0:0.15"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>
                       <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="0:0:0.15"/>
                       <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="0:0:0.15"/>
                     </Storyboard>
@@ -40,16 +44,18 @@
                 <Trigger.EnterActions>
                   <BeginStoryboard>
                     <Storyboard>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.05"/>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.05"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#44111111" Duration="0:0:0.05"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="0.96" Duration="0:0:0.05"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="0.96" Duration="0:0:0.05"/>
                     </Storyboard>
                   </BeginStoryboard>
                 </Trigger.EnterActions>
                 <Trigger.ExitActions>
                   <BeginStoryboard>
                     <Storyboard>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.1"/>
-                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.1"/>
+                      <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#991A1A1A" Duration="0:0:0.1"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleX" To="1.04" Duration="0:0:0.1"/>
+                      <DoubleAnimation Storyboard.TargetName="scale" Storyboard.TargetProperty="ScaleY" To="1.04" Duration="0:0:0.1"/>
                     </Storyboard>
                   </BeginStoryboard>
                 </Trigger.ExitActions>
@@ -59,7 +65,57 @@
         </Setter.Value>
       </Setter>
     </Style>
-    
+
+    <!-- Thin, unobtrusive "Big Picture" scrollbar (just a rounded thumb) -->
+    <Style x:Key="ThinScrollThumb" TargetType="Thumb">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Thumb">
+            <Border CornerRadius="3" Background="#4DFFFFFF"/>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style TargetType="ScrollBar">
+      <Setter Property="Width" Value="6"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ScrollBar">
+            <Grid Background="Transparent">
+              <Track x:Name="PART_Track" IsDirectionReversed="True">
+                <Track.DecreaseRepeatButton>
+                  <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Focusable="False" IsTabStop="False"/>
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                  <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Focusable="False" IsTabStop="False"/>
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                  <Thumb Style="{StaticResource ThinScrollThumb}"/>
+                </Track.Thumb>
+              </Track>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Rounded progress bar -->
+    <Style TargetType="ProgressBar">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ProgressBar">
+            <Border CornerRadius="6" Background="{TemplateBinding Background}" ClipToBounds="True">
+              <Grid>
+                <Border x:Name="PART_Track"/>
+                <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="6" Background="{TemplateBinding Foreground}"/>
+              </Grid>
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <!-- Infinite Slow Rotation for Pokeball -->
     <Storyboard x:Key="RotatePokeball" RepeatBehavior="Forever">
       <DoubleAnimation Storyboard.TargetName="PokeballRotate" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:45" />
@@ -72,21 +128,13 @@
     </EventTrigger>
   </Window.Triggers>
 
-  <Grid Margin="10" Background="Transparent">
+  <Grid Margin="10" Background="Transparent" MouseLeftButtonDown="DragHandle_MouseDown">
     <Grid.Effect>
       <DropShadowEffect Color="Black" BlurRadius="8" Opacity="0.5" Direction="320" ShadowDepth="2"/>
     </Grid.Effect>
-    <Grid.RowDefinitions>
-        <RowDefinition Height="30" />
-        <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
-    
-    <Border Grid.Row="0" Background="#1AFFFFFF" CornerRadius="5" Cursor="SizeAll" MouseLeftButtonDown="DragHandle_MouseDown">
-        <TextBlock Text="DRAG HERE" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#55FFFFFF" FontSize="10" FontFamily="./Fonts/#Poppins" FontWeight="Bold" IsHitTestVisible="False"/>
-    </Border>
 
     <!-- Subdued Rotating Pokeball Watermark (Bottom Right) -->
-    <Grid Grid.Row="1" Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,15,65" Opacity="0.04" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+    <Grid Width="100" Height="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,15,65" Opacity="0.04" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
       <Grid.RenderTransform>
         <RotateTransform x:Name="PokeballRotate" Angle="0"/>
       </Grid.RenderTransform>
@@ -96,6 +144,6 @@
       <Ellipse Width="10" Height="10" Fill="White"/>
     </Grid>
 
-    <Grid Name="RootGrid" Grid.Row="1" />
+    <Grid Name="RootGrid" />
   </Grid>
 </Window>
