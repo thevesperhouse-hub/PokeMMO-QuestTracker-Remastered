@@ -27,10 +27,10 @@ public static class AvatarCatalog
 		new Entry("fille_asian", "avatar_full_fille_asian.png", "avatar_cropped_fille_asian.png"),
 		new Entry("fille_dark", "avatar_full_fille_dark.png", "avatar_cropped_fille_dark.png"),
 		new Entry("fille_metisse", "avatar_full_fille_metisse.png", "avatar_cropped_fille_metisse.png"),
-		new Entry("garcon", "avatar_full_male.png", "avatar_cropped_male.png"),
-		new Entry("garcon_asian", "avatar_full_garçon_asian.png", "avatar_cropped_garçon_asian.png"),
-		new Entry("garcon_dark", "avatar_full_garçon_dark.png", "avatar_cropped_garçon_dark.png"),
-		new Entry("garcon_metisse", "avatar_full_garçon_metisse.png", "avatar_cropped_garçon_metisse.png"),
+		new Entry("garcon", "avatar_full_garcon.png", "avatar_cropped_garcon.png"),
+		new Entry("garcon_asian", "avatar_full_garcon_asian.png", "avatar_cropped_garcon_asian.png"),
+		new Entry("garcon_dark", "avatar_full_garcon_dark.png", "avatar_cropped_garcon_dark.png"),
+		new Entry("garcon_metisse", "avatar_full_garcon_metisse.png", "avatar_cropped_garcon_metisse.png"),
 	};
 
 	public static Entry? Find(string? id)

@@ -25,8 +25,23 @@
   <ItemGroup>
     <Resource Include="Fonts\Poppins-Regular.ttf" />
     <Resource Include="Fonts\Poppins-Bold.ttf" />
-    <Resource Include="Assets\avatar*.png" />
     <Resource Include="app.ico" />
+    <Resource Include="Assets/avatar_full.png" />
+    <Resource Include="Assets/avatar_cropped.png" />
+    <Resource Include="Assets/avatar_full_fille_asian.png" />
+    <Resource Include="Assets/avatar_cropped_fille_asian.png" />
+    <Resource Include="Assets/avatar_full_fille_dark.png" />
+    <Resource Include="Assets/avatar_cropped_fille_dark.png" />
+    <Resource Include="Assets/avatar_full_fille_metisse.png" />
+    <Resource Include="Assets/avatar_cropped_fille_metisse.png" />
+    <Resource Include="Assets/avatar_full_garcon.png" />
+    <Resource Include="Assets/avatar_cropped_garcon.png" />
+    <Resource Include="Assets/avatar_full_garcon_asian.png" />
+    <Resource Include="Assets/avatar_cropped_garcon_asian.png" />
+    <Resource Include="Assets/avatar_full_garcon_dark.png" />
+    <Resource Include="Assets/avatar_cropped_garcon_dark.png" />
+    <Resource Include="Assets/avatar_full_garcon_metisse.png" />
+    <Resource Include="Assets/avatar_cropped_garcon_metisse.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.ico" />
